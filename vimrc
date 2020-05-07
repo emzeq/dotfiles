@@ -1,5 +1,6 @@
 set encoding=utf-8
-set relativenumber
+set cmdheight=2
+set relativenumber number
 set scrolloff=5
 set hidden
 set wildmenu
@@ -28,6 +29,7 @@ set noswapfile
 set title
 set nomodeline
 set autoread
+au CursorHold * checktime
 " Use system clipboard
 set clipboard=unnamedplus
 " Use spaces instead of tabs
@@ -41,6 +43,7 @@ set autoindent
 set smartindent
 set cursorline
 syntax on
+let mapleader = ","
 filetype indent plugin on
 
 " We'll use :h for help
@@ -68,6 +71,7 @@ nnoremap <silent><leader>e :CocCommand explorer<CR>
 noremap <silent><C-s> :update<cr>
 vnoremap <silent><C-s> <C-c>:update<cr>gv
 inoremap <silent><C-s> <C-o>:update<cr>
+nnoremap <silent><leader>s :update<cr>
 
 " Ctrl-q to close buffer
 noremap <silent><C-q> :bwipeout<cr>
@@ -99,8 +103,8 @@ function! MyHighlights() abort
     hi SignifySignChange ctermbg=0
     hi SignifySignDelete ctermbg=0
 
-    hi clear CursorLine
-    hi clear CursorLineNR
+    " hi clear CursorLine
+    " hi clear CursorLineNR
     hi LineNr term=NONE ctermbg=0 ctermfg=8
     hi CursorLineNR term=NONE ctermfg=20 ctermbg=black
     hi StatusLine ctermbg=black ctermfg=8
@@ -127,6 +131,7 @@ Plug 'junegunn/fzf', { 'do': './install --bin' }
 Plug 'junegunn/fzf.vim'
 Plug 'chriskempson/base16-vim'
 Plug 'tpope/vim-commentary'
+Plug 'leafgarland/typescript-vim'
 Plug 'peitalin/vim-jsx-typescript'
 Plug 'SirVer/ultisnips'
 Plug 'honza/vim-snippets'
@@ -235,10 +240,10 @@ augroup omnisharp_commands
     autocmd CursorHold *.cs OmniSharpTypeLookup
 
     " The following commands are contextual, based on the cursor position.
-    autocmd FileType cs nnoremap <buffer> gd :OmniSharpGotoDefinition<CR>
-    autocmd FileType cs nnoremap <buffer> <Leader>fi :OmniSharpFindImplementations<CR>
-    autocmd FileType cs nnoremap <buffer> <Leader>fs :OmniSharpFindSymbol<CR>
-    autocmd FileType cs nnoremap <buffer> <Leader>fu :OmniSharpFindUsages<CR>
+    autocmd FileType cs nnoremap <buffer> <silent>gd :OmniSharpGotoDefinition<CR>
+    autocmd FileType cs nnoremap <buffer> <silent>gi :OmniSharpFindImplementations<CR>
+    autocmd FileType cs nnoremap <buffer> <silent>gs :OmniSharpFindSymbol<CR>
+    autocmd FileType cs nnoremap <buffer> <silent>gr :OmniSharpFindUsages<CR>
 
     " Finds members in the current buffer
     autocmd FileType cs nnoremap <buffer> <Leader>fm :OmniSharpFindMembers<CR>
@@ -249,16 +254,13 @@ augroup omnisharp_commands
     autocmd FileType cs nnoremap <buffer> <C-\> :OmniSharpSignatureHelp<CR>
     autocmd FileType cs inoremap <buffer> <C-\> <C-o>:OmniSharpSignatureHelp<CR>
 
-    " Navigate up and down by method/property/field
-    autocmd FileType cs nnoremap <buffer> <C-k> :OmniSharpNavigateUp<CR>
-    autocmd FileType cs nnoremap <buffer> <C-j> :OmniSharpNavigateDown<CR>
-
     " Find all code errors/warnings for the current solution and populate the quickfix window
     autocmd FileType cs nnoremap <buffer> <Leader>cc :OmniSharpGlobalCodeCheck<CR>
+
+    " Contextual code actions (uses fzf, CtrlP or unite.vim when available)
+    autocmd FileType cs nnoremap <buffer> <silent>ca :OmniSharpGetCodeActions<CR>
 augroup END
 
-" Contextual code actions (uses fzf, CtrlP or unite.vim when available)
-nnoremap <silent><M-space> :OmniSharpGetCodeActions<CR>
 " Run code actions with text selected in visual mode to extract method
 xnoremap <silent><Leader><Space> :call OmniSharp#GetCodeActions('visual')<CR>
 
@@ -321,9 +323,6 @@ set hidden
 set nobackup
 set nowritebackup
 
-" Give more space for displaying messages.
-set cmdheight=1
-
 " Having longer updatetime (default is 4000 ms = 4 s) leads to noticeable
 " delays and poor user experience.
 set updatetime=300
@@ -363,12 +362,6 @@ endif
 nmap <silent> <leader>d <Plug>(coc-diagnostic-next)
 nmap <silent> <leader><S-d> <Plug>(coc-diagnostic-prev)
 
-" GoTo code navigation.
-nmap <silent> gd <Plug>(coc-definition)
-nmap <silent> gy <Plug>(coc-type-definition)
-nmap <silent> gi <Plug>(coc-implementation)
-nmap <silent> gr <Plug>(coc-references)
-
 " Use K to show documentation in preview window.
 nnoremap <silent> K :call <SID>show_documentation()<CR>
 
@@ -393,9 +386,16 @@ nmap <leader>rn <Plug>(coc-rename)
 augroup mygroup
   autocmd!
   " Setup formatexpr specified filetype(s).
-  autocmd FileType typescript,json setl formatexpr=CocAction('formatSelected')
+  autocmd FileType typescript,json,typescript.tsx setl formatexpr=CocAction('formatSelected')
   " Update signature help on jump placeholder.
   autocmd User CocJumpPlaceholder call CocActionAsync('showSignatureHelp')
+
+  " GoTo code navigation.
+  autocmd FileType typescript,typescript.tsx nmap <silent> gd <Plug>(coc-definition)
+  autocmd FileType typescript,typescript.tsx nmap <silent> gy <Plug>(coc-type-definition)
+  autocmd FileType typescript,typescript.tsx nmap <silent> gi <Plug>(coc-implementation)
+  autocmd FileType typescript,typescript.tsx nmap <silent> gr <Plug>(coc-references)
+  autocmd FileType typescript,typescript.tsx nmap <silent> ca :CocAction<CR>
 augroup end
 
 " Applying codeAction to the selected region.
@@ -431,9 +431,9 @@ command! -nargs=? Fold :call     CocAction('fold', <f-args>)
 command! -nargs=0 OR   :call     CocAction('runCommand', 'editor.action.organizeImport')
 
 function! FormatTs()
-  :call CocAction('runCommand', 'editor.action.organizeImport')
-  :sleep 1
-  :call CocAction('format')
+  call CocAction('runCommand', 'tsserver.organizeImports')
+  call CocAction('format')
+  syntax sync fromstart
 endfunction
 
 " Add (Neo)Vim's native statusline support.
@@ -486,8 +486,6 @@ endif
 let g:airline_powerline_fonts = 1
 let g:airline#extensions#tabline#enabled = 1
 let g:airline#extensions#tabline#formatter = 'unique_tail'
-let g:airline#extensions#tabline#left_sep = ' '
-let g:airline#extensions#tabline#left_alt_sep = ' '
 let g:airline_theme='minimalist'
 let g:airline#extensions#coc#enabled = 1
 let g:airline#extensions#tabline#show_tab_nr = 1
@@ -520,5 +518,8 @@ let g:vista_executive_for = {
   \ 'typescript': 'coc',
   \ 'cs': 'coc',
   \ }
+
+" airline status line
+let g:airline_section_a = '%#__accent_bold#%{airline#util#wrap(airline#parts#mode(),0)}' 
 
 set mouse=a
