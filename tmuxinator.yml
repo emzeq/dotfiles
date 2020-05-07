@@ -1,0 +1,19 @@
+# {path to this file}
+
+name: {env name}
+root: {root path}
+
+windows:
+  - editor: nvim
+  - terminal:
+  - git: lazygit
+  - backend: 
+    - dotnet build {...}
+  - frontend:
+    - yarn {...}
+  - database:
+      layout: main-horizontal
+      panes:
+        - while true; do mssql-cli -U {username} -P {password} && sleep 1; done
+        - {db connect}
+
