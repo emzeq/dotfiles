@@ -282,13 +282,8 @@ nnoremap <Leader>sp :OmniSharpStopServer<CR>
 " Enable snippet completion
 let g:OmniSharp_want_snippet=1
 
-
 autocmd FileType * setlocal formatoptions-=c formatoptions-=r formatoptions-=o
-
-
-autocmd Filetype javascript setlocal ts=2 sw=2 sts=0 expandtab
-autocmd Filetype typescript setlocal ts=2 sw=2 sts=0 expandtab
-autocmd Filetype html setlocal ts=2 sw=2 sts=0 expandtab
+autocmd Filetype javascript,typescript,html,sh setlocal ts=2 sw=2 sts=0 expandtab
 
 " Delete trailing white space on save, useful for some filetypes ;)
 fun! CleanExtraSpaces()
@@ -431,7 +426,7 @@ command! -nargs=? Fold :call     CocAction('fold', <f-args>)
 command! -nargs=0 OR   :call     CocAction('runCommand', 'editor.action.organizeImport')
 
 function! FormatTs()
-  call CocAction('runCommand', 'tsserver.organizeImports')
+  " call CocAction('runCommand', 'tsserver.organizeImports')
   call CocAction('format')
   syntax sync fromstart
 endfunction
@@ -502,20 +497,13 @@ nmap <leader>9 <Plug>AirlineSelectTab9
 nmap <leader>- <Plug>AirlineSelectPrevTab
 nmap <leader>+ <Plug>AirlineSelectNextTab
 
-" Auto-close
-inoremap " ""<left>
-inoremap ' ''<left>
-inoremap ( ()<left>
-inoremap [ []<left>
-inoremap { {}<left>
-inoremap {<CR> {<CR>}<ESC>O
-inoremap {;<CR> {<CR>};<ESC>O
-
 " Vista
 let g:vista#renderer#enable_icon = 1
 let g:vista_executive_for = {
   \ 'tsc': 'coc',
+  \ 'tsx': 'coc',
   \ 'typescript': 'coc',
+  \ 'typescript.tsx': 'coc',
   \ 'cs': 'coc',
   \ }
 
