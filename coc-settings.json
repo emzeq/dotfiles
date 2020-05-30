@@ -1,0 +1,10 @@
+{
+	"explorer": {
+		"previewAction": {
+			"onHover": false
+		},
+		"icon": {
+			"enableNerdfont": true
+		}
+	}
+}
